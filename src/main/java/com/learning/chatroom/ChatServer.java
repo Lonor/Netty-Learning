@@ -17,11 +17,16 @@ import java.util.Set;
  */
 public class ChatServer {
 
+    public static void main(String[] args) {
+        ChatServer chatServer = new ChatServer();
+        chatServer.listen();
+    }
+
     private ServerSocketChannel serverSocketChannel;
 
     private Selector selector;
 
-    private static final int PORT = 6667;
+    private static final int PORT = 6666;
 
     /**
      * 初始化服务端
@@ -44,8 +49,9 @@ public class ChatServer {
      */
     public void listen() {
         try {
+            System.out.println("服务端启动 ...");
             while (true) {
-                int select = selector.select(2000);
+                int select = selector.select();
                 if (select > 0) {
                     // 有事件key
                     Set<SelectionKey> selectionKeys = selector.selectedKeys();
@@ -112,15 +118,10 @@ public class ChatServer {
             Channel everyChannel = key.channel();
             if (everyChannel instanceof SocketChannel && everyChannel != fromChannel) {
                 SocketChannel destinationChannel = (SocketChannel) everyChannel;
-                ByteBuffer wrapBuffer = ByteBuffer.wrap(("【" + fromChannel.getRemoteAddress() + "】" + msg).getBytes());
+                ByteBuffer wrapBuffer = ByteBuffer.wrap(msg.getBytes());
                 destinationChannel.write(wrapBuffer);
             }
         }
-    }
-
-    public static void main(String[] args) {
-        ChatServer chatServer = new ChatServer();
-        chatServer.listen();
     }
 
 }
