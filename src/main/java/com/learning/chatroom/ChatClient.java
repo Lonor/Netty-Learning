@@ -86,8 +86,8 @@ public class ChatClient {
                         String msg = new String(buffer.array());
                         System.out.println(msg.trim());
                     }
+                    iterator.remove();
                 }
-                iterator.remove();
             }
         } catch (IOException e) {
             e.printStackTrace();
