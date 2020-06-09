@@ -16,8 +16,12 @@ import io.netty.channel.socket.nio.NioServerSocketChannel;
 public class NettyServer {
     public static void main(String[] args) throws InterruptedException {
         // 创建 Boss Group 、 Worker Group
-        EventLoopGroup bossGroup = new NioEventLoopGroup();
-        EventLoopGroup workerGroup = new NioEventLoopGroup();
+        // bossGroup 只是处理连接请求，真正的客户端业务处理交给 workerGroup 完成
+        // 两个都是无限循环
+        // bossGroup workerGroup 含有的自线程 NioEventLoop 的个数默认是 CPU 核心数量的 2 倍，可在构造中指定数量
+        // 比如服务端机器现在是 12 核心，那其中 NioEventLoop 就是 24 个（EventExecutor）
+        EventLoopGroup bossGroup = new NioEventLoopGroup(1);
+        EventLoopGroup workerGroup = new NioEventLoopGroup(4);
         try {
             ServerBootstrap serverBootstrap = new ServerBootstrap();
             serverBootstrap.group(bossGroup, workerGroup) // 设置线程组
