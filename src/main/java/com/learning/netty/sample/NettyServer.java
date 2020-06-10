@@ -2,6 +2,7 @@ package com.learning.netty.sample;
 
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.channel.ChannelFuture;
+import io.netty.channel.ChannelFutureListener;
 import io.netty.channel.ChannelInitializer;
 import io.netty.channel.ChannelOption;
 import io.netty.channel.EventLoopGroup;
@@ -32,12 +33,23 @@ public class NettyServer {
                         // 给 worker group 的 EventLoop 对应的 pipeline 设置处理器
                         @Override
                         protected void initChannel(SocketChannel ch) throws Exception {
+                            System.out.println("用户 socketChannel hashcode = " + ch.hashCode());
+                            // 可使用一个集合来管理这些 socketChannel
+                            // 在推送消息时，可将业务加入到各个 channel 对应的 NIOEventLoop 的 taskQueue / scheduleTaskQueue
                             ch.pipeline().addLast(new NettyServerHandler());
                         }
                     });
             System.out.println("服务端 ok");
 
             ChannelFuture channelFuture = serverBootstrap.bind(6668).sync();
+            // 给 future 注册监听器：
+            channelFuture.addListener((ChannelFutureListener) future -> {
+                if (channelFuture.isSuccess()) {
+                    System.out.println("监听 6668 端口成功！");
+                } else {
+                    System.out.println("监听 6668 端口失败！");
+                }
+            });
             // 对关闭通道进行监听
             channelFuture.channel().closeFuture().sync();
 
